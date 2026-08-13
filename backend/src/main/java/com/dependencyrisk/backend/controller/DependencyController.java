@@ -14,19 +14,24 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.dependencyrisk.backend.entity.Dependency;
+import com.dependencyrisk.backend.entity.Vulnerability;
 import com.dependencyrisk.backend.service.DependencyService;
+import com.dependencyrisk.backend.service.OSVService;
 
 @RestController
 @RequestMapping("/api/projects/{projectId}/dependencies")
 public class DependencyController {
 
     private final DependencyService dependencyService;
+    private final OSVService osvService;
 
     public DependencyController(
-            DependencyService dependencyService) {
+        DependencyService dependencyService,
+        OSVService osvService) {
 
-        this.dependencyService = dependencyService;
-    }
+    this.dependencyService = dependencyService;
+    this.osvService = osvService;
+}
 
     @PostMapping
     public ResponseEntity<Dependency> addDependency(
@@ -64,4 +69,26 @@ public class DependencyController {
 
         return ResponseEntity.ok(dependencies);
     }
+
+    @PostMapping("/{dependencyId}/scan")
+public ResponseEntity<List<Vulnerability>> scanDependency(
+        @PathVariable Long projectId,
+        @PathVariable Long dependencyId)
+        throws IOException, InterruptedException {
+
+    List<Vulnerability> vulnerabilities =
+            osvService.scanDependency(dependencyId);
+
+    return ResponseEntity.ok(vulnerabilities);
+}
+
+@GetMapping("/{dependencyId}/vulnerabilities")
+public ResponseEntity<List<Vulnerability>> getVulnerabilities(
+        @PathVariable Long projectId,
+        @PathVariable Long dependencyId) {
+
+    return ResponseEntity.ok(
+            osvService.getVulnerabilities(dependencyId)
+    );
+}
 }

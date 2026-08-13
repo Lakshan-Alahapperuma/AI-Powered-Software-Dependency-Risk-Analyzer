@@ -58,6 +58,8 @@ public class DependencyService {
                 .orElseThrow(() ->
                         new RuntimeException("Project not found with id: " + projectId));
 
+                        dependencyRepository.deleteByProjectId(projectId);
+
         JsonNode root = objectMapper.readTree(file.getInputStream());
 
         List<Dependency> dependencies = new ArrayList<>();
