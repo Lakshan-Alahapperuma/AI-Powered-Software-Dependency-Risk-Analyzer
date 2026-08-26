@@ -9,6 +9,9 @@ type Vulnerability = { id: number; vulnerabilityId: string; summary?: string; se
 const API_BASE_URL = import.meta.env.VITE_API_URL || ''
 
 const api = async <T,>(path: string, options?: RequestInit): Promise<T> => {
+  if (!API_BASE_URL && import.meta.env.PROD) {
+    throw new Error('Backend API is not configured. Set VITE_API_URL in Vercel and redeploy.')
+  }
   const response = await fetch(`${API_BASE_URL}${path}`, options)
   if (!response.ok) throw new Error(`Request failed (${response.status})`)
   return response.json() as Promise<T>

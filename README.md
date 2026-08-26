@@ -24,3 +24,19 @@ VITE_API_URL=https://your-backend.example.com
 
 Redeploy after setting the variable. For local development, leave it unset so
 the Vite proxy continues forwarding `/api` requests to `localhost:8080`.
+
+## Deploying the backend to Railway
+
+Create a Railway service from this repository. The root `railway.json` builds
+and starts the Spring Boot application from `backend/`. Add a PostgreSQL
+service, then configure these backend variables using the database service
+values:
+
+```text
+SPRING_DATASOURCE_URL=jdbc:postgresql://HOST:PORT/DATABASE
+SPRING_DATASOURCE_USERNAME=USERNAME
+SPRING_DATASOURCE_PASSWORD=PASSWORD
+```
+
+Railway provides a dynamic `PORT` value automatically. After the backend is
+deployed, set the Vercel `VITE_API_URL` variable to the Railway public URL.

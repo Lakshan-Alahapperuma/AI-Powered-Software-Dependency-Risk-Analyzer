@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +21,7 @@ import com.dependencyrisk.backend.service.OSVService;
 
 @RestController
 @RequestMapping("/api/projects/{projectId}/dependencies")
+@CrossOrigin(origins = "*")
 public class DependencyController {
 
     private final DependencyService dependencyService;
