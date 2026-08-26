@@ -1,11 +1,11 @@
 FROM maven:3.9.11-eclipse-temurin-17 AS build
 
 WORKDIR /app
-COPY pom.xml mvnw ./
-COPY .mvn .mvn
+COPY backend/pom.xml backend/mvnw ./
+COPY backend/.mvn .mvn
 RUN chmod +x mvnw
 RUN ./mvnw dependency:go-offline -B
-COPY src src
+COPY backend/src src
 RUN ./mvnw clean package -DskipTests
 
 FROM eclipse-temurin:17-jre
