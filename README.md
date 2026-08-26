@@ -27,10 +27,10 @@ the Vite proxy continues forwarding `/api` requests to `localhost:8080`.
 
 ## Deploying the backend to Railway
 
-Create a Railway service from this repository. The root `railway.json` builds
-and starts the Spring Boot application from `backend/`. Add a PostgreSQL
-service, then configure these backend variables using the database service
-values:
+Create a Railway service from this repository. The root `railway.json` tells
+Railway to use `backend/Dockerfile`, which provides Java 17 and Maven directly.
+Add a PostgreSQL service, then configure these backend variables using the
+database service values:
 
 ```text
 SPRING_DATASOURCE_URL=jdbc:postgresql://HOST:PORT/DATABASE
