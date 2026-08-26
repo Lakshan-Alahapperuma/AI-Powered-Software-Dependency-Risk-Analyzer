@@ -121,6 +121,7 @@ public class OSVService {
         JsonNode vulns = root.get("vulns");
 
         if (vulns == null || !vulns.isArray()) {
+                        updateRisk(dependency, vulnerabilities);
             return vulnerabilities;
         }
 
@@ -158,9 +159,11 @@ public class OSVService {
             vulnerabilities.add(vulnerability);
         }
 
-        return vulnerabilityRepository.saveAll(
-                vulnerabilities
-        );
+        List<Vulnerability> savedVulnerabilities =
+                vulnerabilityRepository.saveAll(vulnerabilities);
+
+        updateRisk(dependency, savedVulnerabilities);
+        return savedVulnerabilities;
     }
 
     public List<Vulnerability> getVulnerabilities(
@@ -169,6 +172,33 @@ public class OSVService {
         return vulnerabilityRepository
                 .findByDependencyId(dependencyId);
     }
+
+        private void updateRisk(
+                        Dependency dependency,
+                        List<Vulnerability> vulnerabilities) {
+
+                int findingCount = vulnerabilities.size();
+                double riskScore = Math.min(
+                                100,
+                                vulnerabilities.stream()
+                                                .mapToDouble(vulnerability ->
+                                                                riskPoints(vulnerability.getSeverity()))
+                                                .sum());
+
+                dependency.setRiskScore(riskScore);
+                dependency.setRiskLevel(riskLevelFor(riskScore));
+                dependencyRepository.save(dependency);
+        }
+
+        private String riskLevelFor(double riskScore) {
+                if (riskScore == 0) {
+                        return "LOW";
+                }
+                if (riskScore < 50) {
+                        return "MEDIUM";
+                }
+                return "HIGH";
+        }
 
     private String getText(
             JsonNode node,
@@ -184,6 +214,16 @@ public class OSVService {
     }
 
     private String extractSeverity(JsonNode vulnerability) {
+
+                JsonNode databaseSpecific =
+                                vulnerability.get("database_specific");
+
+                if (databaseSpecific != null) {
+                        String severity = getText(databaseSpecific, "severity");
+                        if (severity != null) {
+                                return severity.toUpperCase();
+                        }
+                }
 
         JsonNode severityNode =
                 vulnerability.get("severity");
@@ -210,6 +250,20 @@ public class OSVService {
 
         return null;
     }
+
+        private double riskPoints(String severity) {
+                if (severity == null) {
+                        return 20;
+                }
+
+                return switch (severity.toUpperCase()) {
+                        case "CRITICAL" -> 35;
+                        case "HIGH" -> 25;
+                        case "MODERATE", "MEDIUM" -> 15;
+                        case "LOW" -> 5;
+                        default -> 20;
+                };
+        }
 
     private String extractCvssScore(JsonNode vulnerability) {
 

@@ -71,7 +71,7 @@ public class DependencyController {
     }
 
     @PostMapping("/{dependencyId}/scan")
-public ResponseEntity<List<Vulnerability>> scanDependency(
+    public ResponseEntity<List<Vulnerability>> scanDependency(
         @PathVariable Long projectId,
         @PathVariable Long dependencyId)
         throws IOException, InterruptedException {
@@ -91,4 +91,21 @@ public ResponseEntity<List<Vulnerability>> getVulnerabilities(
             osvService.getVulnerabilities(dependencyId)
     );
 }
+
+    @PostMapping("/scan-all")
+    public ResponseEntity<List<Dependency>> scanAllDependencies(
+        @PathVariable Long projectId)
+        throws IOException, InterruptedException {
+
+        List<Dependency> dependencies =
+            dependencyService.getDependenciesByProject(projectId);
+
+        for (Dependency dependency : dependencies) {
+        osvService.scanDependency(dependency.getId());
+        }
+
+        return ResponseEntity.ok(
+            dependencyService.getDependenciesByProject(projectId)
+        );
+    }
 }
